@@ -98,6 +98,10 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
+      handle_response_hash(get_response_hash(resp, [:show_routingsResponse,
+                                                    :show_routingsResult])) do |hsh|
+        { :routings => hsh[:data] }
+      end
     end
 
     # Return a list of all active Subscribers.
