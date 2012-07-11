@@ -3,8 +3,8 @@ source "http://rubygems.org"
 source "http://gems.github.com"
 
 gem "rake"
-gem "bundler", "~> 1.0.0"
-gem "savon"
+#gem "bundler", "~> 1.0.0"
+gem "savon", "0.7.9"
 
 group :development do
   gem "thoughtbot-shoulda"
@@ -18,7 +18,7 @@ group :development do
   gem "yard", "~> 0.6.0"
   gem "bluecloth"
   gem "cucumber"
-  gem "rcov"
+  gem "simplecov", :require => false
   gem "timecop"
   gem "activesupport", "~> 2.3.5"
   gem (RUBY_VERSION =~ /^1\.9/ ? "ruby-debug19" : "ruby-debug")

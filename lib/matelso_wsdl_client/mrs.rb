@@ -9,9 +9,9 @@ module MatelsoWsdlClient::MRS
   # it's, IMHO, still much preferable to b_number (resp. b_nummer) and c_number (resp. c_nummer).
   #
   # A typical vanity number creation goes like this:
-  #   1. create_subscriber! 
-  #      Creates a new subscriber with Matelso. Because they check the address 
-  #      information, this always returns ok. Once they have done their checking, 
+  #   1. create_subscriber!
+  #      Creates a new subscriber with Matelso. Because they check the address
+  #      information, this always returns ok. Once they have done their checking,
   #      the call an URL on our side to notify us that everything went well.
   #   1a. Asynch call to an URL one has defined with Matelso. This provides a status
   #       and if the subscriber was successful created, a subscriber_id
@@ -25,24 +25,24 @@ module MatelsoWsdlClient::MRS
   # To remove a subscriber, you'll have to remove all the corresponding vanity numbers for
   # the subscriber (delete_vanity_number!) and then the subscriber (delete_subscriber!).
   # Note though, you'll have to track the vanity_number association to subscriber yourself
-  # (Warning: a subscriber can have multiple vanity numbers) because there is no way of 
+  # (Warning: a subscriber can have multiple vanity numbers) because there is no way of
   # obtaining this information from the Matelso API (not at time of writing). Show_subscriber!
   # does not list the vanity numbers of the respective subscriber.
-  
+
   class Client < MatelsoWsdlClient::Client
-    
-    # house_number_additive is actually optional, but a value of "" is as good as 
+
+    # house_number_additive is actually optional, but a value of "" is as good as
     # being optional.
     def create_subscriber!(opts)
       all_parameters = ["salutation", "first_name", "last_name", "firm_name",
-                        "legal_form", "street", "house_number", 
+                        "legal_form", "street", "house_number",
                         "house_number_additive", "postcode", "city", "country"]
 
       check_for_parameters(all_parameters, opts)
-      
+
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
-          client.create_subscriber do |soap| 
+          client.create_subscriber do |soap|
             soap.body = add_soap_prefix do
               all_parameters.inject({}) { |t, key| t.merge(key => getp(key,opts)) }.
                 merge({ "partner_id"         => @partner_id,
@@ -52,24 +52,24 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
-      
-      handle_response_hash(get_response_hash(resp, [:create_subscriberResponse, 
+
+      handle_response_hash(get_response_hash(resp, [:create_subscriberResponse,
                                                     :create_subscriberResult])) do |hsh|
         { :subscriber_id => hsh[:data][:subscriber_id] }
       end
     end
-    
+
     # remove a subscriber after creation.
     # Parameters:
     #   subscriber_id: as returned by create_subscriber!
     def delete_subscriber!(opts)
       check_for_parameters([:subscriber_id], opts)
-      
+
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
-          client.delete_subscriber do |soap| 
-            soap.body = add_soap_prefix do 
-              { 
+          client.delete_subscriber do |soap|
+            soap.body = add_soap_prefix do
+              {
                 "partner_id"       => @partner_id,
                 "partner_password" => @partner_password,
                 "subscriber_id"    => getp(:subscriber_id,opts),
@@ -78,20 +78,19 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
-      
-      handle_response_hash(get_response_hash(resp, [:delete_subscriberResponse, 
+
+      handle_response_hash(get_response_hash(resp, [:delete_subscriberResponse,
                                                     :delete_subscriberResult])) do |hsh|
         { :deleted_subscriber_id => getp(:subscriber_id,opts) }
       end
     end
-    
-    # Return a list of all active Subscribers.
-    def show_subscribers!
+
+    def show_routings!
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
-          client.show_subscriber do |soap| 
-            soap.body = add_soap_prefix do 
-              { 
+          client.show_routings do |soap|
+            soap.body = add_soap_prefix do
+              {
                 "partner_id"       => @partner_id,
                 "partner_password" => @partner_password,
               }
@@ -99,13 +98,29 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
-      
-      handle_response_hash(get_response_hash(resp, [:show_subscriberResponse, 
+    end
+
+    # Return a list of all active Subscribers.
+    def show_subscribers!
+      resp = with_client_and_defaults do |client, defaults|
+        handle_response_errors do
+          client.show_subscriber do |soap|
+            soap.body = add_soap_prefix do
+              {
+                "partner_id"       => @partner_id,
+                "partner_password" => @partner_password,
+              }
+            end
+          end
+        end
+      end
+
+      handle_response_hash(get_response_hash(resp, [:show_subscriberResponse,
                                                     :show_subscriberResult])) do |hsh|
         { :subscribers => hsh[:data] }
       end
     end
-    
+
     # Matelso has a description for a show_subscriber method but unfornuately that
     # should be called show_subscriberS, i.e. it returns all subscribers. So this
     # wrapper provides the functionality as long as Matelso does not provide it.
@@ -119,12 +134,12 @@ module MatelsoWsdlClient::MRS
       if subscriber
         { :status => "ok", :subscriber => subscriber }
       else
-        { :status => "error", 
-          :msg => "No subscriber found with ID '#{getp(:subscriber_id,opts)}'" 
+        { :status => "error",
+          :msg => "No subscriber found with ID '#{getp(:subscriber_id,opts)}'"
         }
       end
     end
-    
+
     # This generates the "b_number" that can be used to route to the actual number
     # of the customer.
     #
@@ -136,9 +151,9 @@ module MatelsoWsdlClient::MRS
 
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
-          client.assign_b_number do |soap| 
-            soap.body = add_soap_prefix do 
-              { 
+          client.assign_b_number do |soap|
+            soap.body = add_soap_prefix do
+              {
                 "partner_id"       => @partner_id,
                 "partner_password" => @partner_password,
                 "subscriber_id"    => getp(:subscriber_id, opts),
@@ -148,8 +163,8 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
-      
-      handle_response_hash(get_response_hash(resp, [:assign_b_numberResponse, 
+
+      handle_response_hash(get_response_hash(resp, [:assign_b_numberResponse,
                                                     :assign_b_numberResult])) do |hsh|
         d = hsh[:data]
         # Not being a Telco person myself:
@@ -158,15 +173,15 @@ module MatelsoWsdlClient::MRS
         { :country_code => d[:cc], :area_code => d[:ndc], :vanity_number => d[:sn] }
       end
     end
-    
+
     def delete_vanity_number!(opts)
       check_for_parameters([:vanity_number], opts)
 
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
-          client.delete_b_number do |soap| 
+          client.delete_b_number do |soap|
             soap.body = add_soap_prefix do
-              { 
+              {
                 "partner_id"        => @partner_id,
                 "partner_password"  => @partner_password,
                 "b_number"          => getp(:vanity_number, opts),
@@ -175,8 +190,8 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
-      
-      handle_response_hash( get_response_hash(resp, [:delete_b_numberResponse, 
+
+      handle_response_hash( get_response_hash(resp, [:delete_b_numberResponse,
                                                      :delete_b_numberResult])) do |hsh|
         { :deleted_vanity_number => getp(:vanity_number, opts) }
       end
@@ -187,9 +202,9 @@ module MatelsoWsdlClient::MRS
 
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
-          client.apply_profile do |soap| 
+          client.apply_profile do |soap|
             soap.body = add_soap_prefix do
-              { 
+              {
                 "partner_id"       => @partner_id,
                 "partner_password" => @partner_password,
                 "b_number"         => getp(:vanity_number, opts),
@@ -200,20 +215,20 @@ module MatelsoWsdlClient::MRS
         end
       end
 
-      handle_response_hash( get_response_hash(resp, [:apply_profileResponse, 
+      handle_response_hash( get_response_hash(resp, [:apply_profileResponse,
                                                      :apply_profileResult]) ) do |hsh|
         { :vanity_number => getp(:vanity_number, opts), :dest_number => getp(:dest_number, opts) }
       end
     end
-    
-    
+
+
     # used to test the callback URL defined with Matelso.
     def test_callback_url!
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
-          client.get_testrequest do |soap| 
-            soap.body = add_soap_prefix do 
-              { 
+          client.get_testrequest do |soap|
+            soap.body = add_soap_prefix do
+              {
                 "partner_id"       => @partner_id,
                 "partner_password" => @partner_password,
               }
@@ -221,24 +236,24 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
-      
-      handle_response_hash( get_response_hash(resp, [:get_testrequestResponse, 
+
+      handle_response_hash( get_response_hash(resp, [:get_testrequestResponse,
                                                      :get_testrequestResult]) ) do |hsh|
         { :http_status => hsh[:data][:http_status] }
       end
     end
 
-    ## 
+    ##
     ## Helpers from here on end.
     ##
     private
-    
+
     # Shortcut so that we don't have to write the same line of code every time.
     def with_client_and_defaults(&block)
       client, defaults = Savon::Client.new(@mrs_wsdl_url), (@defaults["mrs"] || {})
       yield(client, defaults)
     end
-    
+
     # Retrieve the item element from around it's casing. If it's not available,
     # then we return an empty hash.
     #
@@ -249,20 +264,20 @@ module MatelsoWsdlClient::MRS
     #   "show_subscriberresponse"
     # Outside of rails:
     #   "show_subscriber_response"
-    # So we use the same call here. (This is a problem since all the Matelso element names 
+    # So we use the same call here. (This is a problem since all the Matelso element names
     # have strange use of cases.)
     def get_response_hash(response, casing)
       (casing.map { |a| a.to_s.snakecase.to_sym } + [:item]).
         inject(response.to_hash) { |rhsh, elem| rhsh[elem] || {} }
     end
-    
+
     # pass in the result hash from the soap call and define (in the block) the code that
     # should be executed on success. This returns a hash that is merged with the hash
     # that is returned on success.
     def handle_response_hash(hsh, &block)
       case hsh[:status]
-      when "failed" 
-        { :status => "error", 
+      when "failed"
+        { :status => "error",
           :msg => ("%s %s" % [:message,:additional_message].map {|a| hsh[:data][a]}).strip
         }
       when "success"
