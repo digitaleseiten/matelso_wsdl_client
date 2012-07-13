@@ -104,7 +104,28 @@ module MatelsoWsdlClient::MRS
       end
     end
 
+    def show_subscriber_validation_state!
+      resp = with_client_and_defaults do |client, defaults|
+        handle_response_errors do
+          client.show_subscriber_validation_state do |soap|
+            soap.body = add_soap_prefix do
+              {
+                "partner_id"       => @partner_id,
+                "partner_password" => @partner_password,
+              }
+            end
+          end
+        end
+      end
+
+      handle_response_hash(get_response_hash(resp, [:show_subscriberResponse,
+                                                    :show_subscriberResult])) do |hsh|
+        { :subscribers => hsh[:data] }
+      end
+    end
+
     # Return a list of all active Subscribers.
+    # that have a routed number
     def show_subscribers!
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
