@@ -118,8 +118,8 @@ module MatelsoWsdlClient::MRS
         end
       end
 
-      handle_response_hash(get_response_hash(resp, [:show_subscriberResponse,
-                                                    :show_subscriberResult])) do |hsh|
+      handle_response_hash(get_response_hash(resp, [:show_subscriber_validation_stateResponse,
+                                                    :show_subscriber_validation_stateResult])) do |hsh|
         { :subscribers => hsh[:data] }
       end
     end
