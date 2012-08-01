@@ -264,7 +264,10 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
+      handle_response_hash( get_response_hash(resp, [:apply_profile_basic_plusResponse,
+                                                     :apply_profile_basic_plusResult]) ) { |hsh| }
     end
+        
 
     # welcome anouncement contains the filename to be played when the vanity number is called
     def welcome_message!(opts)
@@ -284,6 +287,8 @@ module MatelsoWsdlClient::MRS
           end
         end
       end
+      handle_response_hash( get_response_hash(resp, [:apply_profile_basic_plusResponse,
+                                                     :apply_profile_basic_plusResult]) ) { |hsh| }
     end
 
     # used to test the callback URL defined with Matelso.
