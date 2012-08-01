@@ -259,7 +259,7 @@ module MatelsoWsdlClient::MRS
                 "partner_password" => @partner_password,
 
                 "whispering"       => getp(:whispering, opts),
-                "b_number"         => getp(:vanity_number, opts)
+                "b_number"         => getp(:vanity_number, opts),
                 "c_number"         => getp(:dest_number, opts)
               }
             end
