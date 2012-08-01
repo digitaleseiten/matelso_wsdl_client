@@ -246,6 +246,45 @@ module MatelsoWsdlClient::MRS
       end
     end
 
+    # params: whispering contains the filename to be played when the dest_number picks up
+    def whispering!(opts)
+      check_for_parameters([:whispering, :dest_number], opts)
+      
+      resp = with_client_and_defaults do |client, defaults|
+        handle_response_errors do
+          client.apply_profile_basic_plus do |soap|
+            soap.body = add_soap_prefix do
+              {
+                "partner_id"       => @partner_id,
+                "partner_password" => @partner_password,
+                "whispering"       => getp(:whispering, opts),
+                "c_number"         => getp(:dest_number, opts),
+              }
+            end
+          end
+        end
+      end
+    end
+
+    # welcome anouncement contains the filename to be played when the vanity number is called
+    def welcome_message!(opts)
+      check_for_parameters([:welcome_anouncement, :vanity_number], opts)
+
+      resp = with_client_and_defaults do |client, defaults|
+        handle_response_errors do
+          client.apply_profile_basic_plus do |soap|
+            soap.body = add_soap_prefix do
+              {
+                "partner_id"          => @partner_id,
+                "partner_password"    => @partner_password,
+                "welcome_anouncement" => getp(:welcome_anouncement, opts),
+                "b_number"            => getp(:vanity_number, opts),
+              }
+            end
+          end
+        end
+      end
+    end
 
     # used to test the callback URL defined with Matelso.
     def test_callback_url!
