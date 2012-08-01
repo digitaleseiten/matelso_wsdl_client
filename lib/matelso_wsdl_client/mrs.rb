@@ -248,7 +248,7 @@ module MatelsoWsdlClient::MRS
 
     # params: whispering contains the filename to be played when the dest_number picks up
     def whispering!(opts)
-      check_for_parameters([:whispering, :dest_number], opts)
+      check_for_parameters([:whispering, :dest_number, :vanity_number], opts)
       
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
@@ -257,8 +257,10 @@ module MatelsoWsdlClient::MRS
               {
                 "partner_id"       => @partner_id,
                 "partner_password" => @partner_password,
+
                 "whispering"       => getp(:whispering, opts),
-                "c_number"         => getp(:dest_number, opts),
+                "b_number"         => getp(:vanity_number, opts)
+                "c_number"         => getp(:dest_number, opts)
               }
             end
           end
@@ -271,7 +273,7 @@ module MatelsoWsdlClient::MRS
 
     # welcome anouncement contains the filename to be played when the vanity number is called
     def welcome_message!(opts)
-      check_for_parameters([:welcome_anouncement, :vanity_number], opts)
+      check_for_parameters([:welcome_anouncement, :vanity_number, :dest_number], opts)
 
       resp = with_client_and_defaults do |client, defaults|
         handle_response_errors do
@@ -280,8 +282,10 @@ module MatelsoWsdlClient::MRS
               {
                 "partner_id"          => @partner_id,
                 "partner_password"    => @partner_password,
+
                 "welcome_anouncement" => getp(:welcome_anouncement, opts),
                 "b_number"            => getp(:vanity_number, opts),
+                "c_number"            => getp(:dest_number, opts)
               }
             end
           end
